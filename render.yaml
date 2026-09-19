@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: angry-balloon-realtime
+    runtime: node
+    plan: free
+    buildCommand: npm ci --prefix server
+    startCommand: node server/index.ts
+    healthCheckPath: /health
+    autoDeployTrigger: off
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: 1
+      - key: ALLOWED_ORIGINS
+        sync: false
