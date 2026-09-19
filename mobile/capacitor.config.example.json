@@ -1,0 +1,6 @@
+{
+  "appId": "com.example.angryballoon",
+  "appName": "Angry Balloon",
+  "webDir": "mobile-dist",
+  "server": { "hostname": "localhost", "androidScheme": "https" }
+}

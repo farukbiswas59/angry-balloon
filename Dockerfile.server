@@ -1,0 +1,11 @@
+FROM node:24-alpine
+WORKDIR /app
+COPY server/package*.json ./server/
+RUN npm ci --prefix server --omit=dev
+COPY game/engine.ts ./game/engine.ts
+COPY server/*.ts ./server/
+ENV NODE_ENV=production
+ENV PORT=3001
+EXPOSE 3001
+USER node
+CMD ["node", "server/index.ts"]
