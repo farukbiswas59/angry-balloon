@@ -40,7 +40,7 @@ export function broadcastRoom(room: Room, recipients: Recipient[]) {
       let frame = frames.get(recipient.lastEvent);
       if (frame === undefined) {
         frame = JSON.stringify({ type: 'frame', players: room.players, arrows: room.arrows,
-          score: room.score, now: room.now, phase: room.phase,
+          score: room.score, ammoCircle: room.ammoCircle, now: room.now, phase: room.phase,
           events: room.events.filter(event => event.id > recipient.lastEvent) });
         frames.set(recipient.lastEvent, frame);
         encodings++;

@@ -6,7 +6,7 @@ A landscape-first, real-time team browser game. React + TypeScript renders the i
 
 Deploy the persistent multiplayer server in **Northflank Asia South Delhi** using [NORTHFLANK-SETUP.md](NORTHFLANK-SETUP.md). Keep the website on its existing Render/Vercel host and update its backend URL after deploying. Nothing in this source automatically creates a hosting service.
 
-For Android packaging, AdMob integration and Play Store publication, follow [ANDROID-ADS-GUIDE.md](ANDROID-ADS-GUIDE.md). `npm run build:mobile` generates bundled assets for Capacitor when `NEXT_PUBLIC_GAME_SERVER_URL` contains your production HTTPS backend origin. Native SDK installation, ad integration and a signed Android build remain separate steps described in that guide.
+The native Android app uses `com.angryballoon.farukbiswas`, a developer loading screen, landscape/fullscreen, native AdMob and optional phone-hosted Wi-Fi/hotspot matches. Use [ANDROID-RELEASE-GUIDE.md](ANDROID-RELEASE-GUIDE.md) for the signed APK/AAB, privacy website, ad setup and publishing. `npm run build:android:debug` creates a test-ad APK; `npm run build:android:release` creates signed release APK/AAB files after restoring the private upload key. Public configuration is in `mobile/android-config.json`.
 
 ## Run locally
 
@@ -29,7 +29,7 @@ The top-right battle controls include an enter/exit fullscreen button. Landscape
 - Left joystick moves every role. On desktop, use WASD or arrow keys.
 - Shooters pull the bow backward and release to fire. The bow by the character and the large right-thumb bow both work. Independent pointer IDs allow moving and aiming together.
 - Builders use the right-hand 3×6 selector or tap the actual wall grid. Placement is restricted to their crew's grid, with a server-enforced 500ms cooldown.
-- Each Shooter starts with 30 arrows. Popping an enemy earns 1 point. Crates earn no points; marked enemy reward crates grant their destroying Shooter 3 arrows.
+- Each Shooter starts with 50 arrows. Popping an enemy earns 1 point. Every enemy crate is marked and grants its destroying Shooter 3 arrows, without adding points. Stay inside the centre ammo circle continuously for 2 seconds to receive 5 arrows. The shared circle disappears for 2 seconds after collection, then returns; every new collection needs a fresh 2-second hold. Leaving, dying or disconnecting resets progress.
 - Friendly arrows pass through teammates and friendly walls. Boxes float until destroyed. A shot consumes itself on the nearest valid target.
 - Shooters respawn after 0.5s, Builders after 1.5s; each gets 0.5s protection. No automatic ammo regeneration.
 - Highest score when time expires wins. A tie enters untimed sudden death. The first pop wins.
@@ -94,4 +94,4 @@ The optional read-only browser tool was verified with valid input. Its invalid-i
 
 The sky background and transparent 4×2 balloon sprite sheet were made using the built-in Image Generation tool for this game. Character expressions use original sprite variations. Music, effects and four short personality laughs are synthesized with Web Audio after user interaction; no third-party audio samples are included. Settings persist only on the current device. No Angry Birds artwork, sounds, characters, UI or layouts are used.
 
-Full asset prompts are in `ASSET-CREDITS.md`. Runtime constants (including reward probability, gravity, speed, shot force, cooldowns and respawn timers) are in `game/engine.ts`.
+Full asset prompts are in `ASSET-CREDITS.md`. Runtime constants (including ammo circle timings, gravity, speed, shot force, cooldowns and respawn timers) are in `game/engine.ts`.

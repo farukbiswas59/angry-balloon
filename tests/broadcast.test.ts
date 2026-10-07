@@ -18,6 +18,8 @@ test('ten players share one serialization for a snapshot and for a frame',()=>{
  assert.equal(broadcastRoom(room,peers),1);
  assert.equal(broadcastRoom(room,peers),1);
  assert.ok(peers.every(p=>JSON.parse(p.messages[1]).type==='frame'));
+ room.ammoCircle.readyAt=12;broadcastRoom(room,peers);
+ assert.ok(peers.every(p=>JSON.parse(p.messages[2]).ammoCircle.readyAt===12));
 });
 test('slow players receive the latest wall snapshot after their queue clears',()=>{
  const room=makeRoom('ROOM2','');room.phase='playing';

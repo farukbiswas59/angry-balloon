@@ -81,3 +81,41 @@ html,body{width:100%;overflow-x:clip;overscroll-behavior:none}
   .battle-menu{right:max(10px,env(safe-area-inset-right));gap:5px}.battle-menu button{width:36px;height:36px}.role-chip{top:max(10px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));padding:7px;font-size:9px}
   .results-backdrop{padding:8px max(20px,env(safe-area-inset-right)) 8px max(20px,env(safe-area-inset-left))}.results{padding:12px 24px;max-width:740px}.trophy{width:24px;height:24px}.results .eyebrow{font-size:8px;margin:3px 0}.results h2{font-size:25px}.final-score{gap:36px;margin:4px 0 8px}.final-score span{font-size:32px}.final-score small{font-size:8px}.awards{padding:8px 0;gap:10px}.awards span{font-size:8px;margin-bottom:3px}.awards b{font-size:12px}.awards small{font-size:9px}.personal-stats{font-size:10px;margin:6px 0}.result-actions .play-button{height:36px;font-size:12px}.result-actions>button:not(.play-button){height:36px;font-size:10px}
 }
+
+/* Asset-backed launch screen, sized for landscape phones and display cutouts. */
+.boot-screen{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column;overflow:hidden;background:radial-gradient(ellipse at 50% 25%,#286078,#102e3c 70%);padding:12px max(24px,env(safe-area-inset-right)) 12px max(24px,env(safe-area-inset-left));text-align:center}
+.boot-glow{position:absolute;width:55vmin;height:55vmin;border:1px solid #ffdf6630;border-radius:50%;box-shadow:0 0 0 30px #ffffff03,0 0 0 65px #ffffff02;pointer-events:none}
+.boot-balloon{z-index:1;width:clamp(80px,26dvh,170px);aspect-ratio:1;background:url('/art/balloons.png') 0 0/400% 200%;animation:bob 3s ease-in-out infinite;filter:drop-shadow(0 12px 15px #081c3380)}
+.boot-title{position:relative;font-size:clamp(26px,8dvh,56px);font-weight:1000;line-height:1;letter-spacing:-1.5px;color:#fff3d0;transform:rotate(-3deg);text-shadow:0 4px #123743}
+.boot-title span{color:#ffd24b}.boot-tagline{font-size:clamp(9px,2.3dvh,12px);font-weight:800;letter-spacing:2px;color:#bbd3d7;margin:12px 0 16px}
+.boot-progress{width:min(280px,50vw);height:5px;border-radius:10px;background:#ffffff18;overflow:hidden;position:relative}.boot-progress>span{height:100%;display:block;background:#ffda5e;box-shadow:0 0 15px #ffd24b;transition:width .3s}
+.boot-status{font-size:9px;letter-spacing:2px;color:#d2dfd8;margin-top:10px}.boot-credit{position:relative;margin-top:clamp(14px,5dvh,32px)}.boot-credit span{display:block;font-size:8px;letter-spacing:3px;color:#99b9c0}.boot-credit b{display:block;margin-top:4px;font-size:16px;letter-spacing:.5px;color:#ffe49a}
+
+.age-screen{position:fixed;inset:0;z-index:1001;background:#092837ed;display:grid;place-items:center;padding:20px}.age-card{text-align:center;width:min(500px,85vw);border:1px solid #ffe6a344;border-radius:20px;background:#173e4f;padding:24px}.age-card h2{font-size:24px;letter-spacing:1px;margin:0;color:#ffdf7b}.age-card p{font-size:12px;color:#c5dadb;margin:12px 0 18px}.age-options{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.age-options button{height:45px;border:1px solid #bfdada77;border-radius:9px;background:#26596b;font-size:13px;font-weight:700}.age-unknown{border:0;background:transparent;padding:12px 8px 0;font-size:11px;color:#c5dadb;text-decoration:underline}
+
+.lan-link{border:0;background:transparent;display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#ffe28f;margin-left:12px;padding:3px 0;text-decoration:underline}.lan-address{font-size:10px;color:#ffe18a;max-width:220px;overflow-wrap:anywhere}.lan-host-field{font-size:10px;font-weight:800;letter-spacing:1px;display:grid;gap:6px}.lan-host-field input{font-size:14px;letter-spacing:0}.lan-choice{margin-top:4px}.lan-choice button{flex:1;font-size:10px}
+@media (orientation:landscape) and (max-height:600px){.mode-lan-host,.mode-lan-join{display:grid!important;grid-template-columns:1fr 1fr;gap:8px 14px!important}.mode-lan-host>.field-label,.mode-lan-host>.name-field,.mode-lan-join>.field-label:first-child,.mode-lan-join>.name-field{grid-column:1}.mode-lan-host>.lan-choice,.mode-lan-join>.lan-choice{grid-column:2;grid-row:1/3;align-self:center}.mode-lan-host>.mode-note,.mode-lan-join>.mode-note{grid-column:1/-1;font-size:10px}.mode-lan-host>.play-button,.mode-lan-join>.play-button{grid-column:1/-1;height:38px;font-size:14px}.mode-lan-join>.lan-host-field{grid-column:1;grid-row:3/5}.mode-lan-join>.field-label:not(:first-child),.mode-lan-join>.code-input{grid-column:2}.mode-lan-join>.lan-host-field input{height:38px}.mode-lan-host>.match-preferences{grid-column:1/-1;margin:0;padding:6px 10px}.mode-lan-host .bot-builder-option{padding:0}.lan-address{font-size:9px;max-width:185px}.in-lobby:has(.lan-address) .personality{display:none}.underplay:has(.lan-link){display:flex;align-items:center;justify-content:space-between;font-size:9px}.lan-link{font-size:9px;margin-left:5px}}
+
+.privacy-frame{border:0;width:100%;height:calc(80dvh - 100px);border-radius:8px;background:#102e3c}.game-dialog:has(.privacy-frame){width:min(720px,90vw)}
+@media (orientation:landscape) and (max-height:600px){
+ .play-form.mode-lan-host>label[for=player-name],.play-form.mode-lan-join>label[for=player-name]{grid-row:1}
+ .play-form.mode-lan-host>.name-field,.play-form.mode-lan-join>.name-field{grid-row:2}
+ .play-form.mode-lan-host>.match-preferences{grid-row:3;grid-column:1/-1}
+ .play-form.mode-lan-host>.mode-note{grid-row:4;grid-column:1/-1}
+ .play-form.mode-lan-host>.play-button{grid-row:5}
+ .play-form.mode-lan-join>label[for=room-code]{grid-row:3;grid-column:2}
+ .play-form.mode-lan-join>.code-input{grid-row:4;grid-column:2}
+ .play-form.mode-lan-join>.mode-note{grid-row:5;grid-column:1/-1}
+ .play-form.mode-lan-join>.play-button{grid-row:6}
+ .audio-settings>.text-button{grid-column:auto;min-height:30px}
+}
+
+.age-card[data-slot=dialog-content]{z-index:1001;display:flex;flex-direction:column;gap:0;max-width:min(500px,85vw)}.age-card [data-slot=dialog-title]{font-size:24px;color:#ffdf7b}.age-card [data-slot=dialog-description]{font-size:12px;color:#c5dadb;margin:12px 0 18px}
+
+.play-panel .lan-button{margin-top:10px;background:#214f60;color:#ffdf83;border:2px solid #ffda6880;box-shadow:0 4px 0 #102e3c;gap:10px;font-size:16px;height:52px}.lan-button svg:last-child{margin-left:auto}
+@media (orientation:landscape) and (min-width:700px) and (max-height:600px){
+ .play-panel .lan-button{margin-top:6px;height:38px;min-height:38px;font-size:12px;padding:0 12px}.lan-button svg{width:17px;height:17px}
+ .home-stage:has(.lan-button) .hero-copy h1{font-size:clamp(27px,7.7dvh,39px)}
+ .home-stage:has(.lan-button) .hero-copy>p{margin:5px 0;font-size:11px}
+ .home-stage:has(.lan-button) .hero-copy .eyebrow{margin-bottom:5px}
+}
