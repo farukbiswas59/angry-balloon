@@ -1,6 +1,6 @@
 # Angry Balloon changelog
 
-## 1.2.0 (Android version code 3) — 8 October 2026
+## 1.2.0 (Android version code 4) — 8 October 2026
 
 - Added automatic local-room discovery under Same Wi-Fi / Hotspot. Tap an available room to join; room names use the host’s nickname and room code.
 - Added Refresh Rooms to restart discovery and find rooms created after the initial search.

@@ -8,6 +8,7 @@
     <!-- DNS-SD discovery on older Android devices needs a short-lived multicast lock. -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-feature android:name="android.hardware.wifi" android:required="false" />
     <!-- All ages build: ads remain non-personalized and do not use advertising IDs. -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
     <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID" tools:node="remove" />
