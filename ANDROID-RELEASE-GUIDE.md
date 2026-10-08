@@ -33,7 +33,7 @@ The automated checks cover simulation, networking, matchmaking, LAN room rules, 
 2. Connect them to the same Wi-Fi network. Alternatively, one phone can turn on its hotspot and friends connect to it. The game does not create a hotspot or ask for its password.
 3. On the host phone, tap **SAME WI-FI / HOTSPOT → HOST ON THIS PHONE**. Enter an invented nickname, keep bot Builders on, and tap **HOST LOCAL ROOM**.
 4. The lobby shows the host’s private address, for example `192.168.43.1:3001`, and its five-character room code. If more than one address is shown, use the address belonging to the Wi-Fi/hotspot network your friends joined.
-5. Friends select **JOIN LOCAL ROOM**, enter that address and the room code, and join.
+5. Friends open **Same Wi-Fi / Hotspot**. Available rooms appear automatically as **Faruk’s room · AB7K9**; tap **JOIN** beside the desired room. If discovery is blocked, choose **MANUAL**, enter the host address and room code, and join.
 6. Choose crews. With bot Builders on, two humans plus two Builder bots satisfy the four-player minimum. Each crew needs two members. The host starts the battle.
 7. Keep the host phone in the game with its screen on. Switching apps, closing the host, or turning off its network can interrupt or end the room. There is no host migration to another phone.
 
@@ -48,7 +48,7 @@ npm run install:ci
 ALLOWED_ORIGINS=https://localhost PORT=3001 node server/index.ts
 ```
 
-Find the laptop’s private Wi-Fi IPv4 address in its network settings. Allow incoming port 3001 on your own laptop firewall. Start the laptop browser frontend in a second terminal with `NEXT_PUBLIC_GAME_SERVER_URL=http://127.0.0.1:3001 npm run dev:client` and use Create Room there. Add the printed browser origin to ALLOWED_ORIGINS when starting the server. Android phones choose **JOIN LOCAL ROOM** using the laptop address and code. Example origins: `https://localhost,http://192.168.1.10:5173,http://localhost:5173`. Do not expose this local service through router port forwarding.
+Find the laptop’s private Wi-Fi IPv4 address in its network settings. Allow incoming port 3001 on your own laptop firewall. Start the laptop browser frontend in a second terminal with `NEXT_PUBLIC_GAME_SERVER_URL=http://127.0.0.1:3001 npm run dev:client` and use Create Room there. Add the printed browser origin to ALLOWED_ORIGINS when starting the server. Android phones choose **MANUAL** under **Same Wi-Fi / Hotspot** using the laptop address and code. Example origins: `https://localhost,http://192.168.1.10:5173,http://localhost:5173`. Do not expose this local service through router port forwarding.
 
 ## 3. Keep the online backend running
 
@@ -56,7 +56,7 @@ The app is bundled locally; it does not load the game UI from a remote website. 
 
 `https://p01--angry-balloon-realtime--r47759lh7q88.code.run`
 
-Its health endpoint and WSS handshake were verified during preparation, including the Android origin `https://localhost`. Keep that exact origin in Northflank’s `ALLOWED_ORIGINS` alongside your web game’s origin. Keep one backend instance because rooms live in memory. Deploying or restarting the backend clears active rooms. See `NORTHFLANK-SETUP.md` for the existing Delhi service setup.
+Its health endpoint and WSS handshake were verified during preparation, including the Android origin `https://localhost`. Keep that exact origin in Northflank’s `ALLOWED_ORIGINS` alongside your web game’s origin. Keep one backend instance because rooms live in memory. Deploying or restarting the backend clears active rooms. See `NORTHFLANK-SETUP.md` for deploying to Delhi; the existing service was last verified in US Central.
 
 ## 4. Publish the privacy policy and developer website
 

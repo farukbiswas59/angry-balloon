@@ -2,6 +2,7 @@ import { addPlayer, chooseTeam, chooseRole, makeRoom, start, startReason, step, 
 import { addMatchmakingBuilders } from '../server/matchmaking.ts';
 import { BroadcastClock, broadcastRoom } from '../server/broadcast.ts';
 import type { Room, Player } from './engine.ts';
+import { localRoomInfo } from './lan-discovery.ts';
 
 type Session = { token: string; peer: string | null; room: Room; player: Player; socket: { readyState: number; bufferedAmount: number; send(data: string): void } | null; lastRevision: number; lastEvent: number };
 export type LanPacket = { peer: string; data: string };
@@ -32,6 +33,7 @@ export class LanRoom {
     try { m = JSON.parse(raw); if (!m || typeof m !== 'object' || Array.isArray(m)) return; } catch { return; }
     try {
       if (m.type === 'ping') { this.send(peer, { type: 'pong', at: m.at }); return; }
+      if (m.type === 'room-info') { this.send(peer, { type: 'room-info', room: this.room ? localRoomInfo(this.room) : null }); return; }
       if (m.type === 'resume' && !client.session) {
         const s = typeof m.token === 'string' ? this.sessions.get(m.token) : undefined;
         if (!s || !s.room.players.includes(s.player)) throw Error('Your LAN spot expired. Join again.');

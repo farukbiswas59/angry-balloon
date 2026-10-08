@@ -24,12 +24,26 @@ import org.java_websocket.server.WebSocketServer;
 
 @CapacitorPlugin(name = "LocalNetwork")
 public class LocalNetworkPlugin extends Plugin {
+    private LocalRoomDiscovery roomDiscovery;
+    private LocalRoomBeacon roomBeacon;
     private WebSocketServer server;
     private final Map<String, WebSocket> peers = new ConcurrentHashMap<>();
     private final Map<WebSocket, String> peerIds = new ConcurrentHashMap<>();
     private final Map<String, WebSocketClient> clients = new ConcurrentHashMap<>();
     private static class Rate { long at = System.currentTimeMillis(); int count = 0; }
     private final Map<WebSocket, Rate> rates = new ConcurrentHashMap<>();
+
+    @Override public void load() {
+        roomDiscovery = new LocalRoomDiscovery(getContext(), event -> notifyListeners("discoveryEvent", event));
+        roomBeacon = new LocalRoomBeacon(event -> notifyListeners("discoveryEvent", event));
+    }
+    @PluginMethod public void startDiscovery(PluginCall call) { roomDiscovery.start(); roomBeacon.start(); call.resolve(); }
+    @PluginMethod public void stopDiscovery(PluginCall call) { roomDiscovery.stop(); roomBeacon.stop(); call.resolve(); }
+    @PluginMethod public void advertiseRoom(PluginCall call) {
+        String code = call.getString("code"), name = call.getString("hostName");
+        if (server == null || code == null || !code.matches("[A-Z2-9]{5}") || name == null || name.length() > 16) { call.reject("Create a local room first."); return; }
+        roomDiscovery.advertise(code, name, 3001); roomBeacon.advertise(code); call.resolve();
+    }
 
     private void emit(String event, String type, String key, String id, String data) {
         JSObject payload = new JSObject();
@@ -90,6 +104,8 @@ public class LocalNetworkPlugin extends Plugin {
         server = candidate; candidate.start();
     }
     @PluginMethod public synchronized void stopHost(PluginCall call) {
+        roomDiscovery.stopAdvertising();
+        roomBeacon.stopHost();
         if (server != null) {
             try { server.stop(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
             server = null;
@@ -146,6 +162,8 @@ public class LocalNetworkPlugin extends Plugin {
         WebSocketClient client = clients.remove(call.getString("client")); if (client != null) client.close(); call.resolve();
     }
     @Override protected void handleOnDestroy() {
+        roomDiscovery.destroy();
+        roomBeacon.destroy();
         for (WebSocketClient client : clients.values()) client.close(); clients.clear();
         if (server != null) try { server.stop(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
         server = null; peers.clear(); peerIds.clear(); rates.clear();

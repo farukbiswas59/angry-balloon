@@ -1,6 +1,8 @@
 import { registerPlugin } from '@capacitor/core';
 import type { PluginListenerHandle } from '@capacitor/core';
 import { LanRoom } from './lan-room';
+import { LocalRoomDirectory } from './lan-discovery';
+import type { DiscoveryEvent, DiscoveredRoom } from './lan-discovery';
 
 type HostEvent = { type: string; peer: string; data?: string; message?: string };
 type ClientEvent = { type: string; client: string; data?: string; code?: number };
@@ -11,6 +13,10 @@ const Lan = registerPlugin<{
   connect(options: { client: string; url: string }): Promise<void>;
   sendClient(options: { client: string; data: string }): Promise<void>;
   closeClient(options: { client: string }): Promise<void>;
+  advertiseRoom(options: { code: string; hostName: string }): Promise<void>;
+  startDiscovery(): Promise<void>;
+  stopDiscovery(): Promise<void>;
+  addListener(name: 'discoveryEvent', callback: (event: DiscoveryEvent) => void): Promise<PluginListenerHandle>;
   addListener(name: 'hostEvent', callback: (event: HostEvent) => void): Promise<PluginListenerHandle>;
   addListener(name: 'clientEvent', callback: (event: ClientEvent) => void): Promise<PluginListenerHandle>;
 }>('LocalNetwork');
@@ -53,6 +59,7 @@ class PhoneHost {
   listener: PluginListenerHandle | null = null;
   timer: ReturnType<typeof setInterval> | null = null;
   sending = false;
+  advertised = false;
   onError = (_message: string) => {};
   async start() {
     await this.stop();
@@ -69,6 +76,11 @@ class PhoneHost {
       this.timer = setInterval(() => {
         const now = performance.now(); accumulator += Math.min((now - previous) / 1000, .25); previous = now;
         while (accumulator >= 1/60) { room.tick(1/60, now); accumulator -= 1/60; }
+        if (!this.advertised && room.room?.host) {
+          this.advertised = true;
+          const hostName = room.room.players.find(player => player.id === room.room!.host)?.name || 'SkyRider';
+          void Lan.advertiseRoom({ code: room.room.code, hostName }).catch(() => this.onError('Room discovery is unavailable. Friends can still join with your host address and room code.'));
+        }
         if (!this.sending) {
           const packets = room.drain();
           if (packets.length) {
@@ -83,7 +95,30 @@ class PhoneHost {
   async stop() {
     if (this.timer) clearInterval(this.timer); this.timer = null;
     await this.listener?.remove(); this.listener = null;
-    await Lan.stopHost(); this.room = null; this.sending = false;
+    await Lan.stopHost(); this.room = null; this.sending = false; this.advertised = false;
   }
 }
 export const phoneHost = new PhoneHost();
+
+let discoveryOwner: symbol | null = null;
+export async function discoverLocalRooms(changed: (rooms: DiscoveredRoom[]) => void, error: (message: string) => void) {
+  const owner = Symbol('local-room-search'); discoveryOwner = owner;
+  const directory = new LocalRoomDirectory(url => new NativeLanSocket(url), changed);
+  const listener = await Lan.addListener('discoveryEvent', event => {
+    if (discoveryOwner !== owner) return;
+    if (event.type === 'error') error(event.message || 'Discovery is unavailable. You can still join manually.');
+    else directory.event(event);
+  });
+  const search = async () => {
+    if (discoveryOwner !== owner) return;
+    await Lan.stopDiscovery();
+    if (discoveryOwner === owner) await Lan.startDiscovery();
+  };
+  try { await search(); if (discoveryOwner === owner) directory.start(); }
+  catch { directory.stop(); if (discoveryOwner === owner) discoveryOwner = null; await listener.remove(); throw Error('Discovery is unavailable. You can still join manually.'); }
+  return { refresh: async () => { await search(); if (discoveryOwner === owner) await directory.refresh(); }, stop: async () => {
+    directory.stop();
+    if (discoveryOwner === owner) { discoveryOwner = null; await Lan.stopDiscovery(); }
+    await listener.remove();
+  } };
+}

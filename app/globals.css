@@ -119,3 +119,22 @@ html,body{width:100%;overflow-x:clip;overscroll-behavior:none}
  .home-stage:has(.lan-button) .hero-copy>p{margin:5px 0;font-size:11px}
  .home-stage:has(.lan-button) .hero-copy .eyebrow{margin-bottom:5px}
 }
+
+/* Nearby rooms stay in a bounded list so the landscape dialog fits one screen. */
+.local-room-browser{border:1px solid #80d8f550;border-radius:12px;background:#102f3c80;padding:10px;min-width:0}
+.local-room-heading,.local-room-heading>span,.local-room-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.local-room-heading>span{justify-content:flex-start;font-size:10px;font-weight:800;letter-spacing:1px;color:#ffdf83}
+.local-room-heading>button,.local-room-footer>button{border:0;background:transparent;color:#9eddf5;height:26px;padding:0 4px;font-size:9px;gap:5px}
+.local-room-list{display:grid;gap:6px;max-height:180px;overflow-y:auto;overscroll-behavior:contain;margin:6px 0}
+.local-room-list>.local-room{width:100%;height:auto;min-height:50px;justify-content:space-between;text-align:left;white-space:normal;border:1px solid #80d8f538;border-radius:8px;background:#245466;color:#fff2cb;padding:8px 10px;gap:12px}
+.local-room>span:first-child{min-width:0}.local-room b{display:block;font-size:13px;overflow-wrap:anywhere}.local-room small{display:block;font-size:10px;color:#bdd5d7;margin-top:3px}
+.local-room-join{display:flex;align-items:center;gap:5px;flex-shrink:0;font-size:11px;font-weight:800;color:#ffdf83}
+.local-room-empty{font-size:12px;line-height:1.5;color:#bdd5d7;padding:12px 4px;margin:0}
+.local-room-footer>span,.local-room-error{font-size:10px;color:#bdd5d7}.local-room-error{margin:6px 0 0}
+@media (orientation:landscape) and (max-height:600px){
+ .mode-lan-browse{display:grid!important;grid-template-columns:1fr 1fr;gap:7px 14px!important}
+ .mode-lan-browse>.field-label{grid-column:1;grid-row:1}.mode-lan-browse>.name-field{grid-column:1;grid-row:2}
+ .mode-lan-browse>.lan-choice{grid-column:2;grid-row:1/3;align-self:center}.mode-lan-browse>.local-room-browser,.mode-lan-browse>.mode-note{grid-column:1/-1}
+ .mode-lan-browse>.mode-note{font-size:10px}.local-room-browser{padding:6px 10px}.local-room-list{max-height:100px;margin:3px 0}
+ .local-room-list>.local-room{min-height:44px;padding:5px 8px}.local-room-empty{font-size:11px;padding:6px 3px}.local-room b{font-size:12px}
+}

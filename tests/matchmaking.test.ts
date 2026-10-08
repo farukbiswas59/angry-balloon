@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { makeRoom,addPlayer,chooseTeam,chooseRole,setBotBuilder,step,start,C } from '../game/engine.ts';
+import { makeRoom,addPlayer,chooseTeam,chooseRole,setBotBuilder,rematch,disconnect,removePlayer,step,start,C } from '../game/engine.ts';
 import { selectMatch,availableTeam,preference,addMatchmakingBuilders } from '../server/matchmaking.ts';
 function room(code='ROOM2',isPublic=false){const r=makeRoom(code,'host',0,isPublic);const host=addPlayer(r,'host','Host');chooseTeam(r,host,'blue');return {r,host};}
 test('bot Builders default on while an explicit opt-out remains respected',()=>{
@@ -14,4 +14,27 @@ test('bot Builders obey cooldown, build limit and cannot shoot',()=>{const {r,ho
 test('server matchmaking prefers fullest compatible public room; excludes private, training, active and bot mismatch',()=>{const a=room('FIRST',true).r,b=room('FULLR',true).r;addPlayer(b,'p2','P');addPlayer(b,'p3','P');const privateR=room('PRIVT').r,training=room('TRAIN',true).r;training.training=true;const active=room('ACTIV',true).r;active.phase='playing';const bots=room('BOTSS',true).r;bots.botBuilders=true;assert.equal(selectMatch([a,b,privateR,training,active,bots],preference('any',false)),b);assert.equal(selectMatch([a,b,bots],preference('red',true)),bots);});
 test('team preference is honored and full teams are skipped without moving existing players',()=>{const {r,host}=room('BLUE5',true);for(let i=0;i<4;i++){const p=addPlayer(r,'x'+i,'X');chooseTeam(r,p,'blue');}assert.equal(availableTeam(r,'blue'),null);assert.equal(availableTeam(r,null),'red');assert.equal(selectMatch([r],preference('blue',false)),undefined);assert.equal(host.team,'blue');assert.throws(()=>preference('green',false));assert.throws(()=>preference('any','yes'));});
 test('matching bot mode reserves one Builder slot on each crew',()=>{const r=makeRoom('BOT22','',0,true);r.botBuilders=true;let n=0;addMatchmakingBuilders(r,()=>String(n++));assert.equal(r.players.length,2);assert.deepEqual(r.players.map(p=>[p.team,p.role,p.bot]),[['blue','builder',true],['red','builder',true]]);assert.equal(availableTeam(r,null),'blue');});
-test('public matchmaking countdown waits, cancels on disconnect and restarts on roster changes',()=>{const {r}=room('QUEU2',true);for(let i=1;i<4;i++){const p=addPlayer(r,'p'+i,'P');chooseTeam(r,p,i<2?'blue':'red');}step(r,.1);assert.equal(r.phase,'lobby');assert.equal(r.matchmakingSeconds,8);step(r,3);assert.equal(r.matchmakingSeconds,5);r.players[3].connected=false;step(r,.1);assert.equal(r.matchmakingSeconds,null);r.players[3].connected=true;step(r,.1);assert.equal(r.matchmakingSeconds,8);const newP=addPlayer(r,'p4','Late');chooseTeam(r,newP,'red');step(r,2);assert.equal(r.matchmakingSeconds,8);step(r,8.01);assert.equal(r.phase,'countdown');assert.equal(r.players.filter(p=>p.role==='builder').length,2);});
+test('public rooms wait a full minute without resetting for late arrivals or role changes',()=>{
+ const {r}=room('QUEU2',true);
+ for(let i=1;i<4;i++){const p=addPlayer(r,'p'+i,'P');chooseTeam(r,p,i<2?'blue':'red');}
+ step(r,8);assert.equal(r.phase,'lobby');assert.equal(r.matchmakingSeconds,52);
+ step(r,20);const late=addPlayer(r,'late','Late');chooseTeam(r,late,'red');chooseRole(r,late,'builder');
+ step(r,1);assert.equal(r.matchmakingSeconds,31);
+ step(r,30.9);assert.equal(r.phase,'lobby');step(r,.11);assert.equal(r.phase,'countdown');
+ assert.equal(r.players.filter(p=>p.role==='builder').length,2);
+});
+test('expired public timer waits for valid crews, then starts as soon as they are ready',()=>{
+ const {r}=room('QUEU3',true);step(r,60.1);assert.equal(r.phase,'lobby');assert.equal(r.matchmakingSeconds,0);
+ for(let i=1;i<4;i++){const p=addPlayer(r,'p'+i,'P');chooseTeam(r,p,i<2?'blue':'red');}
+ disconnect(r,r.players[3]);step(r,.1);assert.equal(r.phase,'lobby');
+ r.players[3].connected=true;step(r,.1);assert.equal(r.phase,'countdown');
+});
+test('public host may start early and a rematch gets a new one-minute deadline',()=>{
+ const {r}=room('QUEU4',true);for(let i=1;i<4;i++){const p=addPlayer(r,'p'+i,'P');chooseTeam(r,p,i<2?'blue':'red');}
+ assert.ok(start(r));assert.equal(r.phase,'countdown');r.phase='ended';r.now=200;assert.ok(rematch(r));
+ assert.equal(r.matchAt,260);assert.equal(r.matchmakingSeconds,60);step(r,59);assert.equal(r.phase,'lobby');step(r,1);assert.equal(r.phase,'countdown');
+});
+test('host transfer preserves the public room deadline',()=>{
+ const {r,host}=room('QUEU5',true);const next=addPlayer(r,'next','Next');chooseTeam(r,next,'red');
+ const deadline=r.matchAt;removePlayer(r,host);assert.equal(r.host,next.id);assert.equal(r.matchAt,deadline);
+});

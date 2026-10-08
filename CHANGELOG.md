@@ -1,5 +1,17 @@
 # Angry Balloon changelog
 
+## 1.2.0 (Android version code 3) — 8 October 2026
+
+- Added automatic local-room discovery under Same Wi-Fi / Hotspot. Tap an available room to join; room names use the host’s nickname and room code.
+- Added Refresh Rooms to restart discovery and find rooms created after the initial search.
+- Added a LAN-only UDP discovery fallback for hotspots alongside Android DNS-SD.
+- Kept manual host-address and room-code joining, plus hosting on this phone.
+- Nearby rooms are checked for live availability and player counts; full rooms and games in progress are hidden.
+- Let’s Play now waits in the lobby for the host’s START GAME action or a one-minute deadline. Automatic start still requires both crews to be ready.
+- Late joins, crew/role changes and reconnects no longer reset the lobby timer; rematches receive a fresh minute.
+
+Update the Android app for the room browser and Start Game button, and deploy the backend for the one-minute online start rule. Discovery is for Android phone-hosted rooms; networks that block multicast can use manual joining.
+
 ## 1.1.0 (Android version code 2) — 8 October 2026
 
 - Start each match with 50 arrows.

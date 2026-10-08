@@ -12,7 +12,7 @@ export const stats=():Stats=>({kills:0,deaths:0,fired:0,hits:0,built:0,broken:0,
 export const clamp=(n:number,a:number,b:number)=>Math.max(a,Math.min(b,n));
 export const finite=(n:unknown):n is number=>typeof n==='number'&&Number.isFinite(n);
 export function cleanName(value:unknown){let s=typeof value==='string'?value.normalize('NFKC').replace(/[^\p{L}\p{N} _-]/gu,'').trim().slice(0,16):'';if(/fuck|shit|nigg|cunt|hitler/i.test(s))s='SkyRider';return s||'SkyRider';}
-export function makeRoom(code:string,host:string,now=0,isPublic=false,training=false):Room{return {code,host,public:isPublic,training,phase:'lobby',botBuilders:false,matchAt:0,matchmakingSeconds:null,matchRoster:'',duration:180,maxPlayers:10,players:[],walls:{blue:Array(18).fill(0),red:Array(18).fill(0)},botRepairAfter:{blue:Array(18).fill(0),red:Array(18).fill(0)},arrows:[],ammoCircle:{readyAt:0},score:{blue:0,red:0},now,startAt:0,endAt:0,winner:null,events:[],serial:0,revision:0,created:now,emptyAt:0,lastActive:now};}
+export function makeRoom(code:string,host:string,now=0,isPublic=false,training=false):Room{return {code,host,public:isPublic,training,phase:'lobby',botBuilders:false,matchAt:isPublic?now+MATCHMAKING_WAIT:0,matchmakingSeconds:isPublic?MATCHMAKING_WAIT:null,matchRoster:'',duration:180,maxPlayers:10,players:[],walls:{blue:Array(18).fill(0),red:Array(18).fill(0)},botRepairAfter:{blue:Array(18).fill(0),red:Array(18).fill(0)},arrows:[],ammoCircle:{readyAt:0},score:{blue:0,red:0},now,startAt:0,endAt:0,winner:null,events:[],serial:0,revision:0,created:now,emptyAt:0,lastActive:now};}
 export function emit(r:Room,type:string,extra:Record<string,unknown>={}){r.events.push({id:++r.serial,type,at:r.now,...extra});if(r.events.length>80)r.events.shift();}
 export function addPlayer(r:Room,id:string,name:unknown,bot=false){if(r.phase!=='lobby')throw Error('That battle has already started.');if(r.players.length>=r.maxPlayers)throw Error('This room is full.');const p:Player={id,name:cleanName(name),team:null,role:'shooter',personality:r.players.length%4,bot,connected:true,disconnectedAt:0,x:0,y:0,vx:0,vy:0,ix:0,iy:0,inputAt:r.now,seq:0,ammo:C.initialAmmo,ammoCircleTime:0,deadUntil:0,shieldUntil:0,shotAt:-1,buildAt:-1,aimUntil:0,happyUntil:0,stats:stats()};r.players.push(p);r.revision++;return p;}
 export function chooseTeam(r:Room,p:Player,team:unknown){if(r.phase!=='lobby'||(team!=='blue'&&team!=='red'))return false;if(p.team===team)return true;if(r.players.filter(q=>q.team===team).length>=5)return false;p.team=team;p.role='shooter';r.revision++;return true;}
@@ -36,7 +36,7 @@ export function segmentCircle(x:number,y:number,nx:number,ny:number,cx:number,cy
 export function segmentBox(x:number,y:number,nx:number,ny:number,cx:number,cy:number){let low=0,high=1;for(const [p,d,c] of [[x,nx-x,cx],[y,ny-y,cy]]){if(Math.abs(d)<1e-8){if(p<c-C.box/2||p>c+C.box/2)return Infinity;}else{let a=(c-C.box/2-p)/d,b=(c+C.box/2-p)/d;if(a>b)[a,b]=[b,a];low=Math.max(low,a);high=Math.min(high,b);if(low>high)return Infinity;}}return low;}
 export function disconnect(r:Room,p:Player){p.connected=false;p.ammoCircleTime=0;p.disconnectedAt=r.now;p.ix=p.iy=0;r.revision++;}
 export function removePlayer(r:Room,p:Player){r.players=r.players.filter(q=>q!==p);if(r.host===p.id)r.host=r.players.find(q=>q.connected&&!q.bot)?.id||r.players.find(q=>!q.bot)?.id||'';if(active(r)||r.phase==='countdown')ensureBuilders(r);r.revision++;}
-export function rematch(r:Room){if(r.phase!=='ended')return false;r.phase='lobby';r.matchAt=0;r.matchmakingSeconds=null;r.matchRoster='';r.winner=null;r.arrows=[];r.ammoCircle={readyAt:0};for(const p of r.players)p.ammoCircleTime=0;r.revision++;return true;}
+export function rematch(r:Room){if(r.phase!=='ended')return false;r.phase='lobby';r.matchAt=r.public?r.now+MATCHMAKING_WAIT:0;r.matchmakingSeconds=r.public?MATCHMAKING_WAIT:null;r.matchRoster='';r.winner=null;r.arrows=[];r.ammoCircle={readyAt:0};for(const p of r.players)p.ammoCircleTime=0;r.revision++;return true;}
 export function botStep(r:Room,p:Player,random=Math.random){if(!active(r)||p.deadUntil)return;const side=p.team==='blue'?1:-1;p.ix=Math.sin(r.now*.7+p.personality)*.35;p.iy=Math.cos(r.now*1.1+p.personality)*.6;p.inputAt=r.now;if(p.role==='builder'){const order=[7,10,4,13,1,16,6,9,3,12,0,15,8,11,5,14,2,17];const slot=order.find(s=>!r.walls[p.team!][s]&&r.now>=r.botRepairAfter[p.team!][s]);if(slot!==undefined)place(r,p,slot);}else if(r.now-p.shotAt>1.1+random()*.8){const target=r.players.filter(q=>q.team!==p.team&&!q.deadUntil)[Math.floor(random()*r.players.filter(q=>q.team!==p.team&&!q.deadUntil).length)];if(target){const dx=target.x-p.x,tt=Math.max(.4,Math.abs(dx)/650);shoot(r,p,dx/tt/6.5,(target.y-p.y-.5*C.gravity*tt*tt)/tt/6.5+(random()-.5)*20);}}if(p.x<80||p.x>1200)p.ix=side;}
 export function step(r:Room,dt:number,random=Math.random){r.now+=dt;for(const p of [...r.players])if(!p.connected&&r.now-p.disconnectedAt>=C.grace)removePlayer(r,p);updateMatchmaking(r);if(r.phase==='countdown'&&r.now>=r.startAt){r.phase='playing';emit(r,'fight');r.revision++;}if(!active(r))return;if(r.phase==='playing'&&r.now>=r.endAt){if(r.score.blue===r.score.red){r.phase='sudden';emit(r,'sudden');r.revision++;}else{finish(r,r.score.blue>r.score.red?'blue':'red');return;}}
 for(const p of r.players){if(p.bot)botStep(r,p,random);if(p.deadUntil){if(r.now>=p.deadUntil)spawn(r,p,random);else continue;}if(r.now-p.inputAt>.2)p.ix=p.iy=0;p.vx=p.ix*C.speed;p.vy=p.iy*C.speed;p.x=clamp(p.x+p.vx*dt,45,C.width-45);p.y=clamp(p.y+p.vy*dt,100,C.height-100);}
@@ -71,13 +71,11 @@ export function setBotBuilder(r:Room,actor:Player,team:unknown,enabled:unknown,i
  const bot=addPlayer(r,id,team==='blue'?'Blue Builder':'Red Builder',true);
  chooseTeam(r,bot,team);chooseRole(r,bot,'builder');
 }
-export const MATCHMAKING_WAIT=8;
+export const MATCHMAKING_WAIT=60;
 export function updateMatchmaking(r:Room){
  if(!r.public||r.phase!=='lobby')return;
- const roster=r.players.map(p=>`${p.id}:${p.team}:${p.role}:${p.connected}`).sort().join('|');
- if(startReason(r)){if(r.matchAt||r.matchmakingSeconds!==null){r.matchAt=0;r.matchmakingSeconds=null;r.revision++;}r.matchRoster=roster;return;}
- if(!r.matchAt||r.matchRoster!==roster){r.matchAt=r.now+MATCHMAKING_WAIT;r.matchRoster=roster;}
  const left=Math.max(0,Math.ceil(r.matchAt-r.now));
  if(left!==r.matchmakingSeconds){r.matchmakingSeconds=left;r.revision++;}
- if(r.now>=r.matchAt)start(r);
+ // One deadline per lobby. New players, role changes and reconnects do not restart it.
+ if(r.now>=r.matchAt&&!startReason(r))start(r);
 }
