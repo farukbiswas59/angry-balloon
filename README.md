@@ -29,7 +29,7 @@ The top-right battle controls include an enter/exit fullscreen button. Landscape
 - Left joystick moves every role. On desktop, use WASD or arrow keys.
 - Shooters pull the bow backward and release to fire. The bow by the character and the large right-thumb bow both work. Independent pointer IDs allow moving and aiming together.
 - Builders use the right-hand 3×6 selector or tap the actual wall grid. Placement is restricted to their crew's grid, with a server-enforced 500ms cooldown.
-- Each Shooter starts with 50 arrows. Popping an enemy earns 1 point. Every enemy crate is marked and grants its destroying Shooter 3 arrows, without adding points. Stay inside the centre ammo circle continuously for 2 seconds to receive 5 arrows. The shared circle disappears for 2 seconds after collection, then returns; every new collection needs a fresh 2-second hold. Leaving, dying or disconnecting resets progress.
+- Each Shooter starts with 30 arrows. Popping an enemy earns 1 point. Every enemy crate is marked and grants its destroying Shooter 3 arrows, without adding points. Stay inside the centre ammo circle continuously for 2 seconds to receive 5 arrows. The shared circle disappears for 2 seconds after collection, then returns; every new collection needs a fresh 2-second hold. Leaving, dying or disconnecting resets progress.
 - Friendly arrows pass through teammates and friendly walls. Boxes float until destroyed. A shot consumes itself on the nearest valid target.
 - Shooters respawn after 0.5s, Builders after 1.5s; each gets 0.5s protection. No automatic ammo regeneration.
 - Highest score when time expires wins. A tie enters untimed sudden death. The first pop wins.

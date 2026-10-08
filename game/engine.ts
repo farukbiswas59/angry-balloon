@@ -2,7 +2,7 @@
 export type Team='blue'|'red';
 export type Role='shooter'|'builder';
 export type Phase='lobby'|'countdown'|'playing'|'sudden'|'ended';
-export const C={width:1280,height:720,speed:235,gravity:270,maxForce:850,minForce:180,draw:130,sensitivity:6.5,arrowLife:5,maxArrows:96,shotCooldown:.32,buildCooldown:.5,initialAmmo:50,ammoCircleRadius:64,ammoCircleHold:2,ammoCircleReward:5,ammoCircleCooldown:2,grace:20,protection:.5,shooterRespawn:.5,builderRespawn:1.5,box:42,arrowTip:21,botRepairDelay:.85};
+export const C={width:1280,height:720,speed:235,gravity:270,maxForce:850,minForce:180,draw:130,sensitivity:6.5,arrowLife:5,maxArrows:96,shotCooldown:.32,buildCooldown:.5,initialAmmo:30,ammoCircleRadius:64,ammoCircleHold:2,ammoCircleReward:5,ammoCircleCooldown:2,grace:20,protection:.5,shooterRespawn:.5,builderRespawn:1.5,box:42,arrowTip:21,botRepairDelay:.85};
 export type Stats={kills:number;deaths:number;fired:number;hits:number;built:number;broken:number;rewards:number};
 export type Player={id:string;name:string;team:Team|null;role:Role;personality:number;bot:boolean;connected:boolean;disconnectedAt:number;x:number;y:number;vx:number;vy:number;ix:number;iy:number;inputAt:number;seq:number;ammo:number;ammoCircleTime:number;deadUntil:number;shieldUntil:number;shotAt:number;buildAt:number;aimUntil:number;happyUntil:number;stats:Stats};
 export type Arrow={id:number;owner:string;team:Team;x:number;y:number;vx:number;vy:number;born:number};

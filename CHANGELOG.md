@@ -1,5 +1,12 @@
 # Angry Balloon changelog
 
+## 1.2.1 (Android version code 5) — 8 October 2026
+
+- Reduced starting arrows to 30 for online, practice, local matches and rematches. Box rewards and the centre ammo circle are unchanged.
+- Added 512 catchy preset player names. A random name is filled in automatically on each app launch; Shuffle picks a different name.
+- Names typed by players are remembered, including existing custom names.
+- Opening the play dialog no longer focuses the name input or opens the Android keyboard. Tap the name to edit it; manual host address and room code entry still work normally.
+
 ## 1.2.0 (Android version code 4) — 8 October 2026
 
 - Added automatic local-room discovery under Same Wi-Fi / Hotspot. Tap an available room to join; room names use the host’s nickname and room code.

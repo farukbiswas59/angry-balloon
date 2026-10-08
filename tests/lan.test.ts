@@ -21,7 +21,7 @@ test('a phone hosts a private bot-builder room and two humans can start and reco
   receive('one',{type:'start'}); assert.equal(host.room!.phase,'countdown');
   for (let n = 0; n < 240; n++) host.tick(1/60,n*1000/60);
   assert.equal(host.room!.phase,'playing');
-  const player=host.room!.players.find(p=>p.id===joined.id)!;assert.equal(player.ammo,50);
+  const player=host.room!.players.find(p=>p.id===joined.id)!;assert.equal(player.ammo,30);
   player.x=640;player.y=360;player.ammo=0;
   for(let n=0;n<120;n++)host.tick(1/60,4000+n*1000/60);
   assert.equal(player.ammo,5);
