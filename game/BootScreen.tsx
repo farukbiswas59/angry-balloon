@@ -19,7 +19,7 @@ export default function BootScreen() {
       img.onload = done; img.onerror = done; img.src = src;
       if (img.complete) { img.onload = null; img.onerror = null; done(); }
     }))).then(() => new Promise(resolve => setTimeout(resolve, Math.max(0, 1200 - (performance.now() - start))))).then(() => {
-      if (alive) { setReady(true); void ads.initialize(); }
+      if (alive) { setReady(true); }
     });
     return () => { alive = false; };
   }, []);

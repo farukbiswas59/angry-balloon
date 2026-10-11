@@ -1,3 +1,5 @@
+import { PRACTICE_PRESETS } from './practice-presets.ts';
+import type { Difficulty } from './practice-presets.ts';
 // Pure authoritative simulation. All times are monotonic seconds.
 export type Team='blue'|'red';
 export type Role='shooter'|'builder';
@@ -7,7 +9,7 @@ export type Stats={kills:number;deaths:number;fired:number;hits:number;built:num
 export type Player={id:string;name:string;team:Team|null;role:Role;personality:number;bot:boolean;connected:boolean;disconnectedAt:number;x:number;y:number;vx:number;vy:number;ix:number;iy:number;inputAt:number;seq:number;ammo:number;ammoCircleTime:number;deadUntil:number;shieldUntil:number;shotAt:number;buildAt:number;aimUntil:number;happyUntil:number;stats:Stats};
 export type Arrow={id:number;owner:string;team:Team;x:number;y:number;vx:number;vy:number;born:number};
 export type Event={id:number;type:string;at:number;[key:string]:unknown};
-export type Room={code:string;host:string;public:boolean;training:boolean;phase:Phase;botBuilders:boolean;matchAt:number;matchmakingSeconds:number|null;matchRoster:string;duration:number;maxPlayers:number;players:Player[];walls:Record<Team,number[]>;botRepairAfter:Record<Team,number[]>;arrows:Arrow[];ammoCircle:{readyAt:number};score:Record<Team,number>;now:number;startAt:number;endAt:number;winner:Team|null;events:Event[];serial:number;revision:number;created:number;emptyAt:number;lastActive:number};
+export type Room={code:string;host:string;public:boolean;training:boolean;practiceDifficulty?:Difficulty;phase:Phase;botBuilders:boolean;matchAt:number;matchmakingSeconds:number|null;matchRoster:string;duration:number;maxPlayers:number;players:Player[];walls:Record<Team,number[]>;botRepairAfter:Record<Team,number[]>;arrows:Arrow[];ammoCircle:{readyAt:number};score:Record<Team,number>;now:number;startAt:number;endAt:number;winner:Team|null;events:Event[];serial:number;revision:number;created:number;emptyAt:number;lastActive:number};
 export const stats=():Stats=>({kills:0,deaths:0,fired:0,hits:0,built:0,broken:0,rewards:0});
 export const clamp=(n:number,a:number,b:number)=>Math.max(a,Math.min(b,n));
 export const finite=(n:unknown):n is number=>typeof n==='number'&&Number.isFinite(n);
@@ -37,7 +39,34 @@ export function segmentBox(x:number,y:number,nx:number,ny:number,cx:number,cy:nu
 export function disconnect(r:Room,p:Player){p.connected=false;p.ammoCircleTime=0;p.disconnectedAt=r.now;p.ix=p.iy=0;r.revision++;}
 export function removePlayer(r:Room,p:Player){r.players=r.players.filter(q=>q!==p);if(r.host===p.id)r.host=r.players.find(q=>q.connected&&!q.bot)?.id||r.players.find(q=>!q.bot)?.id||'';if(active(r)||r.phase==='countdown')ensureBuilders(r);r.revision++;}
 export function rematch(r:Room){if(r.phase!=='ended')return false;r.phase='lobby';r.matchAt=r.public?r.now+MATCHMAKING_WAIT:0;r.matchmakingSeconds=r.public?MATCHMAKING_WAIT:null;r.matchRoster='';r.winner=null;r.arrows=[];r.ammoCircle={readyAt:0};for(const p of r.players)p.ammoCircleTime=0;r.revision++;return true;}
-export function botStep(r:Room,p:Player,random=Math.random){if(!active(r)||p.deadUntil)return;const side=p.team==='blue'?1:-1;p.ix=Math.sin(r.now*.7+p.personality)*.35;p.iy=Math.cos(r.now*1.1+p.personality)*.6;p.inputAt=r.now;if(p.role==='builder'){const order=[7,10,4,13,1,16,6,9,3,12,0,15,8,11,5,14,2,17];const slot=order.find(s=>!r.walls[p.team!][s]&&r.now>=r.botRepairAfter[p.team!][s]);if(slot!==undefined)place(r,p,slot);}else if(r.now-p.shotAt>1.1+random()*.8){const target=r.players.filter(q=>q.team!==p.team&&!q.deadUntil)[Math.floor(random()*r.players.filter(q=>q.team!==p.team&&!q.deadUntil).length)];if(target){const dx=target.x-p.x,tt=Math.max(.4,Math.abs(dx)/650);shoot(r,p,dx/tt/6.5,(target.y-p.y-.5*C.gravity*tt*tt)/tt/6.5+(random()-.5)*20);}}if(p.x<80||p.x>1200)p.ix=side;}
+export function botStep(r:Room,p:Player,random=Math.random){if(!active(r)||p.deadUntil)return;if(r.practiceDifficulty){practiceBotStep(r,p,random);return;}const side=p.team==='blue'?1:-1;p.ix=Math.sin(r.now*.7+p.personality)*.35;p.iy=Math.cos(r.now*1.1+p.personality)*.6;p.inputAt=r.now;if(p.role==='builder'){const order=[7,10,4,13,1,16,6,9,3,12,0,15,8,11,5,14,2,17];const slot=order.find(s=>!r.walls[p.team!][s]&&r.now>=r.botRepairAfter[p.team!][s]);if(slot!==undefined)place(r,p,slot);}else if(r.now-p.shotAt>1.1+random()*.8){const target=r.players.filter(q=>q.team!==p.team&&!q.deadUntil)[Math.floor(random()*r.players.filter(q=>q.team!==p.team&&!q.deadUntil).length)];if(target){const dx=target.x-p.x,tt=Math.max(.4,Math.abs(dx)/650);shoot(r,p,dx/tt/6.5,(target.y-p.y-.5*C.gravity*tt*tt)/tt/6.5+(random()-.5)*20);}}if(p.x<80||p.x>1200)p.ix=side;}
+// Offline opponents retain the same movement, ammo and cooldown rules as humans.
+export function practiceBotStep(r:Room,p:Player,random=Math.random){
+ const preset=PRACTICE_PRESETS[p.team==='red'?r.practiceDifficulty||'medium':'medium'];
+ const enemy=r.players.find(q=>q.team!==p.team&&q.role==='shooter'&&!q.deadUntil)||r.players.find(q=>q.team!==p.team&&!q.deadUntil);
+ p.ix=Math.sin(r.now*.9+p.personality)*preset.movement*.3;
+ p.iy=Math.cos(r.now*1.3+p.personality)*preset.movement;
+ if(p.role==='shooter'&&p.ammo<5){
+  const dx=C.width/2-p.x,dy=C.height/2-p.y,d=Math.hypot(dx,dy);
+  p.ix=d>C.ammoCircleRadius*.5?dx/(d||1):0;p.iy=d>C.ammoCircleRadius*.5?dy/(d||1):0;
+ }else if(preset.dodge){
+  const incoming=r.arrows.find(a=>a.team!==p.team&&Math.abs(a.x-p.x)<200&&Math.abs(a.y-p.y)<90&&a.vx*(p.x-a.x)>0);
+  if(incoming)p.iy=p.y<360?1:-1;
+ }
+ p.inputAt=r.now;
+ if(p.role==='builder'){
+  if(r.now-p.buildAt<preset.repairInterval)return;
+  const order=[7,10,4,13,1,16,6,9,3,12,0,15,8,11,5,14,2,17];
+  const slot=order.find(s=>!r.walls[p.team!][s]&&r.now>=r.botRepairAfter[p.team!][s]);
+  if(slot!==undefined)place(r,p,slot);
+ }else if(enemy&&r.now-p.shotAt>=preset.shotInterval){
+  const dx=enemy.x-p.x,t=Math.max(.4,Math.abs(dx)/650);
+  const vx=(dx+enemy.vx*t*preset.lead)/t,vy=(enemy.y+enemy.vy*t*preset.lead-p.y-.5*C.gravity*t*t)/t;
+  p.aimUntil=r.now+.25;
+  shoot(r,p,vx/C.sensitivity,vy/C.sensitivity+(random()-.5)*preset.aimError);
+ }
+ if(p.x<65)p.ix=Math.max(0,p.ix);if(p.x>1215)p.ix=Math.min(0,p.ix);
+}
 export function step(r:Room,dt:number,random=Math.random){r.now+=dt;for(const p of [...r.players])if(!p.connected&&r.now-p.disconnectedAt>=C.grace)removePlayer(r,p);updateMatchmaking(r);if(r.phase==='countdown'&&r.now>=r.startAt){r.phase='playing';emit(r,'fight');r.revision++;}if(!active(r))return;if(r.phase==='playing'&&r.now>=r.endAt){if(r.score.blue===r.score.red){r.phase='sudden';emit(r,'sudden');r.revision++;}else{finish(r,r.score.blue>r.score.red?'blue':'red');return;}}
 for(const p of r.players){if(p.bot)botStep(r,p,random);if(p.deadUntil){if(r.now>=p.deadUntil)spawn(r,p,random);else continue;}if(r.now-p.inputAt>.2)p.ix=p.iy=0;p.vx=p.ix*C.speed;p.vy=p.iy*C.speed;p.x=clamp(p.x+p.vx*dt,45,C.width-45);p.y=clamp(p.y+p.vy*dt,100,C.height-100);}
 const kept:Arrow[]=[];for(const a of r.arrows){if(!active(r))break;const nx=a.x+a.vx*dt,ny=a.y+a.vy*dt+.5*C.gravity*dt*dt;const tip=arrowHead(nx,ny,a.vx,a.vy+C.gravity*dt);const enemy:Team=a.team==='blue'?'red':'blue';let best=Infinity,box=-1,victim:Player|undefined;for(let s=0;s<18;s++){if(!r.walls[enemy][s])continue;const g=grid(enemy,s),t=segmentBox(a.x,a.y,tip.x,tip.y,g.x,g.y);if(t<best){best=t;box=s;victim=undefined;}}for(const p of r.players){if(p.team!==enemy||p.deadUntil||r.now<p.shieldUntil)continue;const t=segmentCircle(a.x,a.y,tip.x,tip.y,p.x,p.y,25);if(t<best){best=t;box=-1;victim=p;}}
@@ -56,7 +85,7 @@ export function updateAmmoCircle(r:Room,dt:number){
   r.revision++;break;
  }
 }
-export function snapshot(r:Room){return {code:r.code,host:r.host,public:r.public,training:r.training,botBuilders:r.botBuilders,matchmakingSeconds:r.matchmakingSeconds,phase:r.phase,duration:r.duration,maxPlayers:r.maxPlayers,players:r.players,walls:r.walls,arrows:r.arrows,ammoCircle:r.ammoCircle,score:r.score,now:r.now,startAt:r.startAt,endAt:r.endAt,winner:r.winner,events:r.events,revision:r.revision};}
+export function snapshot(r:Room){return {code:r.code,host:r.host,public:r.public,training:r.training,practiceDifficulty:r.practiceDifficulty,botBuilders:r.botBuilders,matchmakingSeconds:r.matchmakingSeconds,phase:r.phase,duration:r.duration,maxPlayers:r.maxPlayers,players:r.players,walls:r.walls,arrows:r.arrows,ammoCircle:r.ammoCircle,score:r.score,now:r.now,startAt:r.startAt,endAt:r.endAt,winner:r.winner,events:r.events,revision:r.revision};}
 export type Snapshot=ReturnType<typeof snapshot>;
 
 // Only private-room hosts may edit bot rosters. Bot players use the same simulation rules.

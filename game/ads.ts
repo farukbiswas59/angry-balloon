@@ -81,7 +81,8 @@ class GameAds {
     void this.preload();
   }
   async afterResults(local: boolean) {
-    if (local || !this.active || !this.allowed || !this.ready || this.showing || !this.policy.eligible(Date.now())) { void this.preload(); return; }
+    if (local) return;
+    if (!this.active || !this.allowed || !this.ready || this.showing || !this.policy.eligible(Date.now())) { void this.preload(); return; }
     this.showing = true;
     this.onChange();
     this.ready = false;

@@ -1,5 +1,15 @@
 # Angry Balloon changelog
 
+## 1.3.0 (Android version code 6) — 11 October 2026
+
+- Added a dedicated Offline Practice option with Easy, Medium and Hard presets. You are a Shooter with a bot Builder ally, facing two enemy bots.
+- Practice runs the full match simulation on the device without a multiplayer connection, ad requests or a LAN host. Installed Android apps can play in airplane mode.
+- Difficulty changes enemy aim, shot and repair pace, movement and dodging. Bots with low ammo seek the centre pickup.
+- Practice starts immediately after a countdown, pauses for menus, portrait rotation and backgrounding, and supports rematches or changing difficulty.
+- Added animated cheering, winking, surprised, worried, angry, dizzy and sad faces, with procedural reaction sounds. Sound preferences and reduced-motion settings are respected.
+- Kept 30 starting arrows, all marked box rewards, centre ammo pickups and existing online/LAN rules.
+- Prevented old socket callbacks from reconnecting after switching to offline practice and fitted the extra home option into landscape phone layouts.
+
 ## 1.2.1 (Android version code 5) — 8 October 2026
 
 - Reduced starting arrows to 30 for online, practice, local matches and rematches. Box rewards and the centre ammo circle are unchanged.
