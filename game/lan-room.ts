@@ -1,10 +1,10 @@
-import { addPlayer, chooseTeam, chooseRole, makeRoom, start, startReason, step, shoot, place, input, disconnect, removePlayer, rematch, snapshot, finite, clamp, setBotBuilder } from './engine.ts';
+import { addPlayer, chooseTeam, chooseRole, makeRoom, start, startReason, step, shoot, place, input, disconnect, removePlayer, rematch, snapshot, finite, clamp, setBotBuilder, active } from './engine.ts';
 import { addMatchmakingBuilders } from '../server/matchmaking.ts';
-import { BroadcastClock, broadcastRoom } from '../server/broadcast.ts';
+import { BroadcastClock, broadcastRoom, BROADCAST_MS } from '../server/broadcast.ts';
 import type { Room, Player } from './engine.ts';
 import { localRoomInfo } from './lan-discovery.ts';
 
-type Session = { token: string; peer: string | null; room: Room; player: Player; socket: { readyState: number; bufferedAmount: number; send(data: string): void } | null; lastRevision: number; lastEvent: number };
+type Session = { token: string; peer: string | null; room: Room; player: Player; socket: { readyState: number; bufferedAmount: number; send(data: string): void } | null; lastRevision: number; lastEvent: number; protocol: number; lastStructure?: number };
 export type LanPacket = { peer: string; data: string };
 
 // The phone runs exactly the same authoritative game simulation as the cloud.
@@ -14,7 +14,7 @@ export class LanRoom {
   sessions = new Map<string, Session>();
   peers = new Map<string, { session?: Session; at: number; requests: number }>();
   packets: LanPacket[] = [];
-  clock = new BroadcastClock(0);
+  clock = new BroadcastClock(0, BROADCAST_MS);
   private uid: () => string;
   constructor(uid: () => string = () => crypto.randomUUID()) { this.uid = uid; }
   open(peer: string) { if (this.peers.size < 12) this.peers.set(peer, { at: 0, requests: 0 }); }
@@ -38,7 +38,7 @@ export class LanRoom {
         const s = typeof m.token === 'string' ? this.sessions.get(m.token) : undefined;
         if (!s || !s.room.players.includes(s.player)) throw Error('Your LAN spot expired. Join again.');
         if (s.peer && s.peer !== peer) throw Error('This player is already connected.');
-        client.session = s; s.peer = peer; s.socket = this.socket(peer); s.player.connected = true; s.player.inputAt = s.room.now; s.room.revision++; s.lastRevision = -1;
+        client.session = s; s.peer = peer; s.socket = this.socket(peer); s.protocol = m.v === 2 ? 2 : 1; s.player.connected = true; s.player.inputAt = s.room.now; s.room.revision++; s.lastRevision = -1;
         this.send(peer, { type: 'joined', token: s.token, id: s.player.id, state: snapshot(s.room) }); return;
       }
       if (m.type === 'join' && !client.session) {
@@ -52,7 +52,7 @@ export class LanRoom {
         const room = this.room!;
         const player = addPlayer(room, this.uid(), m.name);
         if (!room.host) room.host = player.id;
-        const s: Session = { token: this.uid() + this.uid(), peer, room, player, socket: this.socket(peer), lastRevision: -1, lastEvent: room.serial };
+        const s: Session = { token: this.uid() + this.uid(), peer, room, player, socket: this.socket(peer), lastRevision: -1, lastEvent: room.serial, protocol: m.v === 2 ? 2 : 1 };
         this.sessions.set(s.token, s); client.session = s;
         this.send(peer, { type: 'joined', token: s.token, id: player.id, state: snapshot(room) }); return;
       }
@@ -71,7 +71,8 @@ export class LanRoom {
         case 'start': if (r.host === p.id && !start(r)) throw Error(startReason(r) || 'Match already started.'); break;
         case 'input': input(r, p, m.x, m.y, m.seq); break;
         case 'aim': p.aimUntil = r.now + .3; break;
-        case 'shoot': shoot(r, p, m.dx, m.dy); break;
+        case 'shoot': shoot(r, p, m.dx, m.dy, m.x, m.y); break;
+        case 'sync': s.lastRevision = -1; break;
         case 'place': place(r, p, m.slot); break;
         case 'rematch': if (r.host === p.id) rematch(r); break;
         case 'leave': removePlayer(r, p); this.sessions.delete(s.token); client.session = undefined; this.send(peer, { type: 'left' }); break;
@@ -83,7 +84,9 @@ export class LanRoom {
     if (this.room) {
       step(this.room, dt);
       for (const [token, session] of this.sessions) if (!this.room.players.includes(session.player)) this.sessions.delete(token);
-      if (this.clock.due(now)) broadcastRoom(this.room, [...this.sessions.values()]);
+      const recipients = [...this.sessions.values()];
+      if (this.clock.due(now)) broadcastRoom(this.room, recipients);
+      else if (active(this.room)) broadcastRoom(this.room, recipients, true);
     }
   }
   drain() { const packets = this.packets; this.packets = []; return packets; }

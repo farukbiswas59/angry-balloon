@@ -25,9 +25,9 @@ export default function BootScreen() {
   }, []);
   if (ready) return <AgeScreen/>;
   return <section className="boot-screen" aria-label="Loading Angry Balloon" role="status">
-    <div className="boot-glow"/><div className="boot-balloon"/>
-    <div className="boot-title">ANGRY <span>BALLOON</span></div>
-    <p className="boot-tagline">A LITTLE AIR. A LOT OF ATTITUDE.</p>
+    <div className="boot-sky"/><div className="boot-balloon"/>
+    <div className="wordmark boot-wordmark"><span className="wordmark-top">ANGRY</span><span className="wordmark-main">BALLOON</span></div>
+    <p className="boot-tagline">A little air. A lot of attitude.</p>
     <div className="boot-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}><span style={{width: `${progress * 100}%`}}/></div>
     <span className="boot-status">PREPARING YOUR SKY…</span>
     <div className="boot-credit"><span>DEVELOPED BY</span><b>Faruk Biswas</b></div>
@@ -38,10 +38,10 @@ function AgeScreen() {
   const [needed, setNeeded] = useState(ads.needsAge);
   const [busy, setBusy] = useState(ads.initializing || ads.showing);
   useEffect(() => ads.subscribe(() => { setNeeded(ads.needsAge); setBusy(ads.initializing || ads.showing); }), []);
-  return <Dialog open={needed || busy}><DialogContent className="age-card" showCloseButton={false} onEscapeKeyDown={event => event.preventDefault()} onInteractOutside={event => event.preventDefault()}>
+  return <Dialog open={needed || busy}><DialogContent className="game-dialog age-card" showCloseButton={false} onEscapeKeyDown={event => event.preventDefault()} onInteractOutside={event => event.preventDefault()}>
     <DialogTitle>{needed?'YOUR AGE RANGE':ads.showing?'RETURNING TO YOUR SKY…':'PREPARING PRIVACY SETTINGS…'}</DialogTitle>
     <DialogDescription>{needed?<>Only this range is saved on your device.<br/>We don’t ask for your date of birth.</>:'The game will continue automatically.'}</DialogDescription>
-    {needed&&<><div className="age-options">{[['under13','Under 13'],['13to15','13–15'],['16to17','16–17'],['adult','18 or older']].map(([value,label]) => <button key={value} onClick={() => ads.selectAge(value)}>{label}</button>)}</div>
-    <button className="age-unknown" onClick={() => ads.selectAge('unknown')}>Prefer not to say</button></>}
+    {needed&&<><div className="age-options">{[['under13','Under 13'],['13to15','13–15'],['16to17','16–17'],['adult','18 or older']].map(([value,label]) => <button className="btn btn-paper" key={value} onClick={() => ads.selectAge(value)}>{label}</button>)}</div>
+    <button className="link-btn age-unknown" onClick={() => ads.selectAge('unknown')}>Prefer not to say</button></>}
   </DialogContent></Dialog>;
 }
