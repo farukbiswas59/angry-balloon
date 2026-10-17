@@ -6,7 +6,7 @@ A landscape-first, real-time team browser game. React + TypeScript renders the i
 
 Deploy the persistent multiplayer server in **Northflank Asia South Delhi** using [NORTHFLANK-SETUP.md](NORTHFLANK-SETUP.md). Keep the website on its existing Render/Vercel host and update its backend URL after deploying. Nothing in this source automatically creates a hosting service.
 
-The native Android app uses `com.angryballoon.farukbiswas`, a developer loading screen, landscape/fullscreen, native AdMob and optional phone-hosted Wi-Fi/hotspot matches. Use [ANDROID-RELEASE-GUIDE.md](ANDROID-RELEASE-GUIDE.md) for the signed APK/AAB, privacy website, ad setup and publishing. `npm run build:android:debug` creates a test-ad APK; `npm run build:android:release` creates signed release APK/AAB files after restoring the private upload key. Public configuration is in `mobile/android-config.json`.
+The native Android app uses `app.angryballoon` (Java code stays in the `com.angryballoon.farukbiswas` namespace), a developer loading screen, landscape/fullscreen, native AdMob and optional phone-hosted Wi-Fi/hotspot matches. Use [ANDROID-RELEASE-GUIDE.md](ANDROID-RELEASE-GUIDE.md) for the signed APK/AAB, privacy website, ad setup and publishing. `npm run build:android:debug` creates a test-ad APK; `npm run build:android:release` creates signed release APK/AAB files after restoring the private upload key. Public configuration is in `mobile/android-config.json`.
 
 ## Run locally
 

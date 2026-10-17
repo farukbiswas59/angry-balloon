@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.angryballoon.farukbiswas',
+  appId: 'app.angryballoon',
   appName: 'Angry Balloon',
   webDir: 'mobile-dist',
   server: { hostname: 'localhost', androidScheme: 'https' },

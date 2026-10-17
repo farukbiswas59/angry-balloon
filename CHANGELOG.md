@@ -1,5 +1,20 @@
 # Angry Balloon changelog
 
+## 1.4.1 (Android version code 9) — 15 October 2026
+
+- Better use of 19.5:9 and 20:9 phone screens: the lobby shows both crews and all controls side by side without scrolling, the home screen fills the width, and the joystick and bow pad move to the screen edges, clear of the arena.
+- Fixed selected buttons (Host on the Wi-Fi screen, role, match time, preferred crew) turning grey after being tapped.
+
+## 1.4.0 (Android version code 8) — 15 October 2026
+
+- Brand-new look across every screen: home, lobby, battle HUD, results, dialogs and the loading screen, built for landscape phones.
+- Restyled battlefield: new crates, fletched arrows, power ring on the bow, pop bursts, a drifting cloud floor, and controls moved out of the flight area.
+- Smoother online play: your balloon, shots and crates respond instantly, and game updates use about 5x less data at a faster 30 updates per second.
+
+## 1.3.1 (Android version code 7) — 14 October 2026
+
+- Rebuilt version 1.3.0 with a new Play version code so the update can be uploaded as a fresh app bundle. Game features are unchanged.
+
 ## 1.3.0 (Android version code 6) — 11 October 2026
 
 - Added a dedicated Offline Practice option with Easy, Medium and Hard presets. You are a Shooter with a bot Builder ally, facing two enemy bots.

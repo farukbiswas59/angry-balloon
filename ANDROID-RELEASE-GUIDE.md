@@ -13,7 +13,7 @@ Prepared 7 October 2026 for Faruk Biswas.
 | `angry-balloon-privacy-website.zip` | A small ready-to-host public developer website, privacy policy and app-ads.txt. |
 | `angry-balloon-private-signing-backup.zip` | Private upload key and passwords. Keep off GitHub and out of shared folders. |
 
-Package: `com.angryballoon.farukbiswas`. First release: version name `1.0.0`, version code `1`. Minimum Android 7 / API 24; target Android 16 / API 36. Phones start in landscape and immersive fullscreen. The screen can rotate to either landscape side. Android may control orientation on large or resizable displays.
+Package: `app.angryballoon` (published as a new Play app from 1.4.0; the original listing used `com.angryballoon.farukbiswas`). First release: version name `1.0.0`, version code `1`. Minimum Android 7 / API 24; target Android 16 / API 36. Phones start in landscape and immersive fullscreen. The screen can rotate to either landscape side. Android may control orientation on large or resizable displays.
 
 Developer credit: **Faruk Biswas**. Public support/privacy email: **farukbiswas59@icloud.com**.
 

@@ -9,7 +9,7 @@ android {
     namespace = "com.angryballoon.farukbiswas"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.angryballoon.farukbiswas"
+        applicationId "app.angryballoon"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode gameConfig.versionCode
