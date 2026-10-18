@@ -1,5 +1,9 @@
 # Angry Balloon changelog
 
+## 1.4.2 (Android version code 10) — 18 October 2026
+
+- Online matches now run on a new game server at angryballoon.farukbiswas.com. Gameplay is unchanged.
+
 ## 1.4.1 (Android version code 9) — 15 October 2026
 
 - Better use of 19.5:9 and 20:9 phone screens: the lobby shows both crews and all controls side by side without scrolling, the home screen fills the width, and the joystick and bow pad move to the screen edges, clear of the arena.
